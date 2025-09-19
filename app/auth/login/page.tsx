@@ -12,6 +12,7 @@ import { Leaf, Eye, EyeOff, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
+import { signIn } from "@/../src/authService"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -30,7 +31,9 @@ export default function LoginPage() {
     try {
       const email = userType === "patient" ? patientEmail : pracEmail
       const password = userType === "patient" ? patientPassword : pracPassword
-      await login(email, password)
+      const { error } = await signIn(email, password)
+      if (error) throw error
+      // Let Firebase hook continue to manage session for app state if both are used
       router.push(userType === "patient" ? "/dashboard/patient" : "/dashboard/practitioner")
     } catch (err) {
       console.error(err)

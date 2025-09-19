@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Leaf, Eye, EyeOff, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { signUp } from "@/../src/authService"
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -29,16 +30,21 @@ export default function RegisterPage() {
     }
 
     setIsLoading(true)
-
-    // Mock registration - replace with real auth logic
-    setTimeout(() => {
+    try {
+      const firstName = (document.getElementById(`${userType}-first-name`) as HTMLInputElement)?.value || ""
+      const lastName = (document.getElementById(`${userType}-last-name`) as HTMLInputElement)?.value || ""
+      const email = (document.getElementById(`${userType}-email`) as HTMLInputElement)?.value || ""
+      const password = (document.getElementById(`${userType}-password`) as HTMLInputElement)?.value || ""
+      const fullName = `${firstName} ${lastName}`.trim()
+      const { error } = await signUp(email, password, fullName)
+      if (error) throw error
+      router.push(userType === "patient" ? "/dashboard/patient" : "/dashboard/practitioner")
+    } catch (err) {
+      console.error(err)
+      alert("Registration failed. Please try again.")
+    } finally {
       setIsLoading(false)
-      if (userType === "patient") {
-        router.push("/dashboard/patient")
-      } else {
-        router.push("/dashboard/practitioner")
-      }
-    }, 1500)
+    }
   }
 
   return (
