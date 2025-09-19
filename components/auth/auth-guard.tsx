@@ -2,9 +2,10 @@
 
 import type React from "react"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Leaf } from "lucide-react"
+import { useAuth } from "@/hooks/use-auth"
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -12,31 +13,18 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
-  const [isLoading, setIsLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const router = useRouter()
+  const { isLoading, isAuthenticated, user } = useAuth()
 
   useEffect(() => {
-    // Mock authentication check - replace with real auth logic
-    const checkAuth = () => {
-      // Simulate checking authentication status
-      const mockAuth = localStorage.getItem("mockAuth")
-      const mockRole = localStorage.getItem("mockRole")
-
-      if (mockAuth === "true") {
-        if (requiredRole && mockRole !== requiredRole) {
-          router.push("/auth/login")
-          return
-        }
-        setIsAuthenticated(true)
-      } else {
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.push("/auth/login")
+      } else if (requiredRole && user?.role && user.role !== requiredRole) {
         router.push("/auth/login")
       }
-      setIsLoading(false)
     }
-
-    checkAuth()
-  }, [router, requiredRole])
+  }, [isLoading, isAuthenticated, user, requiredRole, router])
 
   if (isLoading) {
     return (

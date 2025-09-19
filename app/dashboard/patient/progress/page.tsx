@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -22,6 +22,10 @@ import {
   Radar,
 } from "recharts"
 import { motion } from "framer-motion"
+import { AuthGuard } from "@/components/auth/auth-guard"
+import { PatientLayout } from "@/components/layouts/patient-layout"
+import { useAuth } from "@/hooks/use-auth"
+import { getWellnessMetrics } from "@/lib/firebase"
 
 const progressData = [
   { date: "2024-01-01", wellness: 65, energy: 60, sleep: 70, stress: 40 },
@@ -46,9 +50,22 @@ const treatmentProgress = [
 
 export default function ProgressPage() {
   const [selectedMetric, setSelectedMetric] = useState("wellness")
+  const { user } = useAuth()
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    const load = async () => {
+      if (!user?.uid) return
+      await getWellnessMetrics(user.uid)
+      setLoaded(true)
+    }
+    load()
+  }, [user?.uid])
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
+    <AuthGuard requiredRole="patient">
+      <PatientLayout>
+        <div className="container mx-auto p-6 space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-emerald-900">Progress Tracking</h1>
@@ -315,6 +332,8 @@ export default function ProgressPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+        </div>
+      </PatientLayout>
+    </AuthGuard>
   )
 }

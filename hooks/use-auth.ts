@@ -1,86 +1,59 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
+import { auth } from "@/lib/firebase"
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
+import { getUserProfile, updateUserProfile, signUpUser, loginUser, logoutUser } from "@/lib/firebase"
 
-interface User {
-  id: string
-  email: string
-  firstName: string
-  lastName: string
-  role: "patient" | "practitioner"
-  avatar?: string
+type UserRole = "patient" | "practitioner"
+
+interface AppUser {
+  uid: string
+  email: string | null
+  displayName: string | null
+  role?: UserRole
 }
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<AppUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Mock authentication check - replace with real auth logic
-    const checkAuth = () => {
-      const mockAuth = localStorage.getItem("mockAuth")
-      const mockRole = localStorage.getItem("mockRole")
-
-      if (mockAuth === "true") {
-        // Mock user data
+    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const profile = await getUserProfile(firebaseUser.uid)
         setUser({
-          id: "1",
-          email: "user@example.com",
-          firstName: "John",
-          lastName: "Doe",
-          role: (mockRole as "patient" | "practitioner") || "patient",
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          role: profile?.role as UserRole | undefined,
         })
+      } else {
+        setUser(null)
       }
       setIsLoading(false)
-    }
-
-    checkAuth()
+    })
+    return () => unsub()
   }, [])
 
-  const login = async (email: string, password: string, role: "patient" | "practitioner") => {
-    // Mock login - replace with real auth logic
-    localStorage.setItem("mockAuth", "true")
-    localStorage.setItem("mockRole", role)
-
-    setUser({
-      id: "1",
-      email,
-      firstName: "John",
-      lastName: "Doe",
-      role,
-    })
-
-    return { success: true }
+  const login = async (email: string, password: string) => {
+    await loginUser({ email, password })
   }
 
-  const logout = () => {
-    localStorage.removeItem("mockAuth")
-    localStorage.removeItem("mockRole")
-    setUser(null)
+  const register = async ({ name, email, password, role }: { name: string; email: string; password: string; role: UserRole }) => {
+    await signUpUser({ name, email, password, role })
   }
 
-  const register = async (userData: any, role: "patient" | "practitioner") => {
-    // Mock registration - replace with real auth logic
-    localStorage.setItem("mockAuth", "true")
-    localStorage.setItem("mockRole", role)
-
-    setUser({
-      id: "1",
-      email: userData.email,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      role,
-    })
-
-    return { success: true }
+  const logout = async () => {
+    await logoutUser()
   }
 
   return {
     user,
     isLoading,
-    login,
-    logout,
-    register,
     isAuthenticated: !!user,
+    login,
+    register,
+    logout,
   }
 }

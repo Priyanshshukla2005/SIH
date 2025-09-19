@@ -22,6 +22,7 @@ import {
   Plus,
 } from "lucide-react"
 import { PatientLayout } from "@/components/layouts/patient-layout"
+import { AuthGuard } from "@/components/auth/auth-guard"
 import { SessionCard } from "@/components/dashboard/session-card"
 import { ProgressChart } from "@/components/dashboard/progress-chart"
 import { WellnessMetrics } from "@/components/dashboard/wellness-metrics"
@@ -89,7 +90,8 @@ export default function PatientDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
 
   return (
-    <PatientLayout>
+    <AuthGuard requiredRole="patient">
+      <PatientLayout>
       <div className="space-y-6">
         {/* Welcome Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -444,6 +446,7 @@ export default function PatientDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-    </PatientLayout>
+      </PatientLayout>
+    </AuthGuard>
   )
 }

@@ -11,26 +11,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Leaf, Eye, EyeOff, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/use-auth"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("patient")
   const router = useRouter()
+  const { login } = useAuth()
+  const [patientEmail, setPatientEmail] = useState("")
+  const [patientPassword, setPatientPassword] = useState("")
+  const [pracEmail, setPracEmail] = useState("")
+  const [pracPassword, setPracPassword] = useState("")
 
   const handleLogin = async (e: React.FormEvent, userType: string) => {
     e.preventDefault()
     setIsLoading(true)
-
-    // Mock authentication - replace with real auth logic
-    setTimeout(() => {
+    try {
+      const email = userType === "patient" ? patientEmail : pracEmail
+      const password = userType === "patient" ? patientPassword : pracPassword
+      await login(email, password)
+      router.push(userType === "patient" ? "/dashboard/patient" : "/dashboard/practitioner")
+    } catch (err) {
+      console.error(err)
+      alert("Login failed. Please check your credentials.")
+    } finally {
       setIsLoading(false)
-      if (userType === "patient") {
-        router.push("/dashboard/patient")
-      } else {
-        router.push("/dashboard/practitioner")
-      }
-    }, 1500)
+    }
   }
 
   return (
@@ -79,6 +86,8 @@ export default function LoginPage() {
                       placeholder="Enter your email"
                       required
                       className="border-green-200 focus:border-primary"
+                      value={patientEmail}
+                      onChange={(e) => setPatientEmail(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
@@ -90,6 +99,8 @@ export default function LoginPage() {
                         placeholder="Enter your password"
                         required
                         className="border-green-200 focus:border-primary pr-10"
+                        value={patientPassword}
+                        onChange={(e) => setPatientPassword(e.target.value)}
                       />
                       <Button
                         type="button"
@@ -127,6 +138,8 @@ export default function LoginPage() {
                       placeholder="Enter your email"
                       required
                       className="border-green-200 focus:border-primary"
+                      value={pracEmail}
+                      onChange={(e) => setPracEmail(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
@@ -138,6 +151,8 @@ export default function LoginPage() {
                         placeholder="Enter your password"
                         required
                         className="border-green-200 focus:border-primary pr-10"
+                        value={pracPassword}
+                        onChange={(e) => setPracPassword(e.target.value)}
                       />
                       <Button
                         type="button"
