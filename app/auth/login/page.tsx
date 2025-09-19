@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -18,7 +18,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("patient")
   const router = useRouter()
-  const { login } = useAuth()
+  const { login, isAuthenticated } = useAuth()
   const [patientEmail, setPatientEmail] = useState("")
   const [patientPassword, setPatientPassword] = useState("")
   const [pracEmail, setPracEmail] = useState("")
@@ -40,6 +40,13 @@ export default function LoginPage() {
       setIsLoading(false)
     }
   }
+
+  // If already logged in, redirect to dashboard
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard/patient")
+    }
+  }, [isAuthenticated, router])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4">
