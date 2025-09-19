@@ -12,7 +12,7 @@ import { Leaf, Eye, EyeOff, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
-import { signIn } from "@/../src/authService"
+import { loginUser, signInWithGoogle } from "@/src/firebaseAuth"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -31,8 +31,7 @@ export default function LoginPage() {
     try {
       const email = userType === "patient" ? patientEmail : pracEmail
       const password = userType === "patient" ? patientPassword : pracPassword
-      const { error } = await signIn(email, password)
-      if (error) throw error
+      await loginUser({ email, password })
       // Let Firebase hook continue to manage session for app state if both are used
       router.push(userType === "patient" ? "/dashboard/patient" : "/dashboard/practitioner")
     } catch (err) {
@@ -183,6 +182,23 @@ export default function LoginPage() {
                 </form>
               </TabsContent>
             </Tabs>
+
+            <div className="mt-4">
+              <Button type="button" variant="outline" className="w-full" onClick={async () => {
+                setIsLoading(true)
+                try {
+                  await signInWithGoogle()
+                  router.push("/dashboard/patient")
+                } catch (e) {
+                  console.error(e)
+                  alert("Google sign-in failed")
+                } finally {
+                  setIsLoading(false)
+                }
+              }}>
+                Sign in with Google
+              </Button>
+            </div>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">

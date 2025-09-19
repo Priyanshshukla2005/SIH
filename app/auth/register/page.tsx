@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Leaf, Eye, EyeOff, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { signUp } from "@/../src/authService"
+import { signUpUser } from "@/src/firebaseAuth"
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -36,8 +36,8 @@ export default function RegisterPage() {
       const email = (document.getElementById(`${userType}-email`) as HTMLInputElement)?.value || ""
       const password = (document.getElementById(`${userType}-password`) as HTMLInputElement)?.value || ""
       const fullName = `${firstName} ${lastName}`.trim()
-      const { error } = await signUp(email, password, fullName)
-      if (error) throw error
+      const role = userType === "patient" ? "patient" : "practitioner"
+      await signUpUser({ name: fullName, email, password, role })
       router.push(userType === "patient" ? "/dashboard/patient" : "/dashboard/practitioner")
     } catch (err) {
       console.error(err)

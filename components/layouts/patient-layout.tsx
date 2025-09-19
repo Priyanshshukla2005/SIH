@@ -29,6 +29,7 @@ import {
   MessageSquare,
 } from "lucide-react"
 import Link from "next/link"
+import { logoutUser } from "@/src/firebaseAuth"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
@@ -198,11 +199,9 @@ export function PatientLayout({ children }: PatientLayoutProps) {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/auth/login">
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign out
-                    </Link>
+                  <DropdownMenuItem onClick={async () => { await logoutUser(); }}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
