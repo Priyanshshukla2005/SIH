@@ -3,8 +3,7 @@ import type { Metadata } from "next"
 import { Inter, Poppins } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import { QueryProvider } from "@/components/query-provider"
 import "./globals.css"
 
 const inter = Inter({
@@ -32,14 +31,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const queryClient = new QueryClient()
   return (
     <html lang="en">
       <body className={`font-sans ${inter.variable} ${poppins.variable} antialiased`}>
-        <QueryClientProvider client={queryClient}>
+        <QueryProvider>
           <Suspense fallback={null}>{children}</Suspense>
-          <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
+        </QueryProvider>
         <Analytics />
       </body>
     </html>
