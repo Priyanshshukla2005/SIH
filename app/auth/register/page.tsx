@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Leaf, Eye, EyeOff, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { signUpUser } from "@/src/firebaseAuth"
+import { signUpUser } from "@/lib/firebase"
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)

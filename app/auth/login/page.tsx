@@ -12,7 +12,7 @@ import { Leaf, Eye, EyeOff, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
-import { loginUser, signInWithGoogle } from "@/src/firebaseAuth"
+import { loginUser, signInWithGoogle } from "@/lib/firebase"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)

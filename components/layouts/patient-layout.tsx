@@ -29,7 +29,7 @@ import {
   MessageSquare,
 } from "lucide-react"
 import Link from "next/link"
-import { logoutUser } from "@/src/firebaseAuth"
+import { logoutUser } from "@/lib/firebase"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
