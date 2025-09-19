@@ -1,9 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { auth } from "@/lib/firebase"
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
-import { getUserProfile, updateUserProfile, signUpUser, loginUser, logoutUser } from "@/lib/firebase"
+import { supabase } from "@/lib/supabaseClient"
 
 type UserRole = "patient" | "practitioner"
 
@@ -19,33 +17,47 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const profile = await getUserProfile(firebaseUser.uid)
-        setUser({
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          displayName: firebaseUser.displayName,
-          role: profile?.role as UserRole | undefined,
-        })
+    const session = supabase.auth.getSession().then(({ data }) => {
+      const s = data.session
+      if (s?.user) {
+        setUser({ uid: s.user.id, email: s.user.email, displayName: s.user.user_metadata?.name || null })
       } else {
         setUser(null)
       }
       setIsLoading(false)
     })
-    return () => unsub()
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setUser({ uid: session.user.id, email: session.user.email, displayName: session.user.user_metadata?.name || null })
+      } else {
+        setUser(null)
+      }
+    })
+    return () => {
+      listener.subscription.unsubscribe()
+    }
   }, [])
 
   const login = async (email: string, password: string) => {
-    await loginUser({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) throw error
   }
 
   const register = async ({ name, email, password, role }: { name: string; email: string; password: string; role: UserRole }) => {
-    await signUpUser({ name, email, password, role })
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name, role } },
+    })
+    if (error) throw error
+    const uid = data.user?.id
+    if (uid) {
+      await supabase.from("profiles").upsert({ id: uid, name, email, role })
+    }
   }
 
   const logout = async () => {
-    await logoutUser()
+    await supabase.auth.signOut()
   }
 
   return {

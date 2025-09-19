@@ -29,7 +29,8 @@ import {
   MessageSquare,
 } from "lucide-react"
 import Link from "next/link"
-import { logoutUser } from "@/lib/firebase"
+import { supabase } from "@/lib/supabaseClient"
+import { useRouter } from "next/navigation"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
@@ -49,6 +50,7 @@ const navigation = [
 export function PatientLayout({ children }: PatientLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
@@ -199,7 +201,7 @@ export function PatientLayout({ children }: PatientLayoutProps) {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={async () => { await logoutUser(); }}>
+                  <DropdownMenuItem onClick={async () => { await supabase.auth.signOut(); router.push("/auth/login") }}>
                     <LogOut className="w-4 h-4 mr-2" />
                     Sign out
                   </DropdownMenuItem>

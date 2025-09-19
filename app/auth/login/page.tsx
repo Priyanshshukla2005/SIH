@@ -12,7 +12,6 @@ import { Leaf, Eye, EyeOff, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
-import { loginUser, signInWithGoogle } from "@/lib/firebase"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -31,7 +30,7 @@ export default function LoginPage() {
     try {
       const email = userType === "patient" ? patientEmail : pracEmail
       const password = userType === "patient" ? patientPassword : pracPassword
-      await loginUser({ email, password })
+      await login(email, password)
       // Let Firebase hook continue to manage session for app state if both are used
       router.push(userType === "patient" ? "/dashboard/patient" : "/dashboard/practitioner")
     } catch (err) {
@@ -184,20 +183,7 @@ export default function LoginPage() {
             </Tabs>
 
             <div className="mt-4">
-              <Button type="button" variant="outline" className="w-full" onClick={async () => {
-                setIsLoading(true)
-                try {
-                  await signInWithGoogle()
-                  router.push("/dashboard/patient")
-                } catch (e) {
-                  console.error(e)
-                  alert("Google sign-in failed")
-                } finally {
-                  setIsLoading(false)
-                }
-              }}>
-                Sign in with Google
-              </Button>
+              {/* Optional: keep Google button via Firebase if needed; currently omitted for Supabase-only flow */}
             </div>
 
             <div className="mt-6 text-center">
